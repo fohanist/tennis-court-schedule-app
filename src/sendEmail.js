@@ -16,7 +16,7 @@ async function sendMail(contents) {
   let info = await transporter.sendMail({
     from: process.env.FROM_MAIL_ADRESS,
     to: process.env.TO_MAIL_ADRESS,
-    subject: `[${currentDate.dateNow}]김포생활체육관 테니스장 예약 가능 코트`,
+    subject: `[${currentDate.dateNow} 기준] 김포생활체육관 테니스장 예약 가능 코트`,
     html: contents,
   });
 
