@@ -1,36 +1,60 @@
-const currentDate = require("./src/date");
 const getReserInfo = require("./src/scraping");
 const toHtml = require("./src/toHtml");
 const sendMail = require("./src/sendEmail");
-
+const generateForm = require("./src/generateForm");
+const cron = require("node-cron");
 const courtGroup = {};
 const targetUrlArray = [];
 
 /*
-김포도시관리공사 통합예약시스템
-https://yeyak.guc.or.kr/
+  작업 스케쥴러 - 11:59, 23:59 마다 해당 앱 실행
 */
-
-for (let i = 0; i < 8; i++) {
-  targetUrlArray.push(
-    `https://yeyak.guc.or.kr/rent/application/index/${
-      currentDate.dateNow
-    }/2/GIMPO02/${currentDate.month}/${i + 18}`
-  );
-}
-
-const scrapingPromise = targetUrlArray.map((item, index) => {
-  return getReserInfo(item, index + 1);
+cron.schedule("59 11,23 * * *", () => {
+  main();
 });
 
-Promise.all(scrapingPromise)
-  .then((res) => {
-    for (let i = 0; i < 8; i++) {
-      courtGroup[`court${i + 1}`] = res[i];
-    }
-    return toHtml(courtGroup);
-  })
-  .then((form) => {
-    sendMail(form);
-  })
-  .catch((e) => console.error(e));
+/*
+  스크래핑 위치: 김포도시관리공사 통합예약시스템
+  https://yeyak.guc.or.kr/
+*/
+
+function main() {
+  const currentDate = require("./src/date");
+  for (let i = 0; i < 8; i++) {
+    targetUrlArray.push(
+      `https://yeyak.guc.or.kr/rent/application/index/${
+        currentDate.dateNow
+      }/2/GIMPO02/${currentDate.month}/${i + 18}`
+    );
+  }
+
+  const scrapingPromise = targetUrlArray.map((item, _) => {
+    return getReserInfo(item);
+  });
+
+  Promise.all(scrapingPromise)
+    .then((res) => {
+      for (let i = 0; i < 8; i++) {
+        courtGroup[`court${i + 1}`] = res[i];
+      }
+
+      const form = generateForm(courtGroup[`court1`]);
+
+      for (let i = 0; i < 8; i++) {
+        courtGroup[`court${i + 1}`].forEach((item) => {
+          form.forEach((o) => {
+            o.forEach((k) => {
+              if (k.date === item.date && k.time === item.time) {
+                k.court.push(i + 1);
+              }
+            });
+          });
+        });
+      }
+      return toHtml(form);
+    })
+    .then((form) => {
+      sendMail(form);
+    })
+    .catch((e) => console.error(e));
+}
