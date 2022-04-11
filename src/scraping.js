@@ -2,7 +2,7 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const iconv = require("iconv-lite");
 
-async function getReserInfo(targetUrl, index) {
+async function getReserInfo(targetUrl) {
   const response = await axios.get(targetUrl, {
     responseType: "arraybuffer",
   });
