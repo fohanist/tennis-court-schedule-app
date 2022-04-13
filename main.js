@@ -3,6 +3,7 @@ const toHtml = require("./src/toHtml");
 const sendMail = require("./src/sendEmail");
 const generateForm = require("./src/generateForm");
 const cron = require("node-cron");
+const getCurrentTime = require("./src/date");
 const courtGroup = {};
 const targetUrlArray = [];
 
@@ -19,12 +20,11 @@ cron.schedule("59 11,23 * * *", () => {
 */
 
 function main() {
-  const currentDate = require("./src/date");
   for (let i = 0; i < 8; i++) {
     targetUrlArray.push(
       `https://yeyak.guc.or.kr/rent/application/index/${
-        currentDate.dateNow
-      }/2/GIMPO02/${currentDate.month}/${i + 18}`
+        getCurrentTime().dateNow
+      }/2/GIMPO02/${getCurrentTime().month}/${i + 18}`
     );
   }
 

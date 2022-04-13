@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const currentDate = require("./date");
+const getCurrentTime = require("./date");
 require("dotenv").config();
 
 async function sendMail(contents) {
@@ -16,7 +16,9 @@ async function sendMail(contents) {
   let info = await transporter.sendMail({
     from: process.env.FROM_MAIL_ADRESS,
     to: process.env.TO_MAIL_ADRESS,
-    subject: `[${currentDate.dateNow} 기준] 김포생활체육관 테니스장 예약 가능 코트`,
+    subject: `[${
+      getCurrentTime().dateNow
+    } 기준] 김포생활체육관 테니스장 예약 가능 코트`,
     html: contents,
   });
 
